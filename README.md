@@ -116,7 +116,6 @@ toram-fillstat-simulator/
 ├── math.js                      # Math calculation utilities
 ├── t4stat.js                    # Core fillstat logic dan database stats
 ├── interface-integration.js     # Integration layer untuk modern UI
-├── newfill.js                   # [Jika ada] Additional fillstat utilities
 └── README.md                    # Dokumentasi ini
 ```
 
