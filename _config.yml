@@ -1,0 +1,102 @@
+# =============================================================================
+# 🌐 GITHUB PAGES CONFIGURATION - JEKYLL
+# Konfigurasi untuk Toram Fill Stats Simulator di GitHub Pages
+# =============================================================================
+
+# Site Settings
+title: "Toram Fill Stats Simulator"
+description: "Simulator lengkap untuk menghitung fill stats Toram Online dengan interface modern dan user-friendly"
+baseurl: ""
+url: "https://username.github.io"
+
+# Build Settings
+markdown: kramdown
+highlighter: rouge
+incremental: false
+safe: true
+
+# Plugins (hanya yang didukung GitHub Pages)
+plugins:
+  - jekyll-sitemap
+  - jekyll-feed
+  - jekyll-seo-tag
+
+# SEO
+lang: id
+author: "Toram Indonesia Community"
+twitter:
+  username: toram_indonesia
+  card: summary_large_image
+
+# Theme (optional)
+# theme: minima
+
+# Navigation
+header_pages:
+  - index.html
+  - fillstat-simulator.html
+
+# Collections
+collections:
+  pages:
+    output: true
+    permalink: /:name/
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "default"
+      author: "Toram Indonesia Community"
+
+# Include in build
+include:
+  - _pages
+  - _redirects
+  - .well-known
+
+# Exclude from build
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+  - .htaccess
+  - "*.php"
+  - "config.php"
+
+# GitHub Pages specific
+github:
+  repository_url: "https://github.com/username/toram-fillstat"
+
+# Timezone
+timezone: Asia/Jakarta
+encoding: utf-8
+
+# Liquid Options
+liquid:
+  error_mode: warn
+  strict_filters: false
+  strict_variables: false
+
+# Sass/SCSS Settings
+sass:
+  sass_dir: _sass
+  style: compressed
+
+# Kramdown Settings
+kramdown:
+  input: GFM
+  hard_wrap: false
+  auto_ids: true
+  footnote_nr: 1
+  entity_output: as_char
+  toc_levels: 1..6
+  smart_quotes: lsquo,rsquo,ldquo,rdquo
+  enable_coderay: false

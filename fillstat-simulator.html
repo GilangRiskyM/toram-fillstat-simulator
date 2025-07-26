@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Toram Fill Stats Simulator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 30px;
+      font-size: 2em;
+    }
+    
+    .settings-section {
+      background: #ecf0f1;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 25px;
+    }
+    
+    .settings-row {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 15px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      min-width: 150px;
+    }
+    
+    label {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #34495e;
+    }
+    
+    input, select, button {
+      padding: 10px;
+      border: 2px solid #bdc3c7;
+      border-radius: 5px;
+      font-size: 14px;
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      transition: all 0.3s ease;
+    }
+    
+    input:focus, select:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+    }
+    
+    button {
+      background: #3498db;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    button:hover {
+      background: #2980b9;
+      transform: translateY(-2px);
+    }
+    
+    button:disabled {
+      background: #95a5a6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .workspace {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-top: 25px;
+    }
+    
+    .slots-section {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    
+    .slot-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      align-items: center;
+    }
+    
+    .slot-number {
+      width: 30px;
+      text-align: center;
+      font-weight: bold;
+      color: #7f8c8d;
+    }
+    
+    .stat-select {
+      flex: 2;
+    }
+    
+    .stat-input {
+      flex: 1;
+      max-width: 80px;
+    }
+    
+    .mat-cost {
+      color: #27ae60;
+      font-size: 12px;
+      font-weight: bold;
+      min-width: 120px;
+    }
+    
+    .results-section {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    
+    .potential-display {
+      background: #3498db;
+      color: white;
+      padding: 15px;
+      border-radius: 5px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    
+    .success-rate {
+      background: #27ae60;
+      color: white;
+      padding: 15px;
+      border-radius: 5px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      transition: background-color 0.3s ease;
+    }
+    
+    .success-rate.high {
+      background: #27ae60;
+    }
+    
+    .success-rate.medium {
+      background: #f39c12;
+    }
+    
+    .success-rate.low {
+      background: #e74c3c;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    
+    .controls button {
+      flex: 1;
+      min-width: 100px;
+    }
+    
+    .formula-display {
+      background: white;
+      border: 2px solid #e1e8ed;
+      border-radius: 5px;
+      padding: 15px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    
+    .material-costs {
+      background: white;
+      border: 2px solid #e1e8ed;
+      border-radius: 5px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+    
+    .material-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .material-table th,
+    .material-table td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .material-table th {
+      background-color: #f2f2f2;
+      font-weight: bold;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .error {
+      color: #e74c3c;
+      font-weight: bold;
+    }
+    
+    .success {
+      color: #27ae60;
+      font-weight: bold;
+    }
+    
+    @media (max-width: 768px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+      
+      .settings-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .slot-row {
+        flex-direction: column;
+        gap: 5px;
+      }
+      
+      .controls {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🗡️ Toram Fill Stats Simulator 🛡️</h1>
+    
+    <div style="background: #f39c12; color: white; padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: center; font-weight: bold;">
+      ⚠️ Ini hanyalah simulasi saja, bisa terjadi perbedaan di dalam game.
+    </div>
+    
+    <div class="settings-section">
+      <h3>⚙️ Pengaturan Dasar</h3>
+      <div class="settings-row">
+        <div class="form-group">
+          <label for="itemType">Tipe Item:</label>
+          <select id="itemType">
+            <option value="w">Weapon (Senjata)</option>
+            <option value="a">Armor (Zirah)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="startingPot">POT Awal:</label>
+          <input type="number" id="startingPot" placeholder="Contoh: 99" min="1" max="999">
+        </div>
+        <div class="form-group">
+          <label for="recipePot">POT Resep:</label>
+          <input type="number" id="recipePot" value="46" min="1" max="999">
+        </div>
+      </div>
+      
+      <div class="settings-row">
+        <div class="form-group">
+          <label for="tec">TEC:</label>
+          <input type="number" id="tec" value="255" min="0" max="255">
+        </div>
+        <div class="form-group">
+          <label for="proficiency">Proficiency:</label>
+          <input type="number" id="proficiency" value="0" min="0" max="999">
+        </div>
+        <div class="form-group">
+          <label for="matReduction">
+            <input type="checkbox" id="matReduction"> 10% Mat Reduction
+          </label>
+        </div>
+        <div class="form-group">
+          <button onclick="startSimulation()">🚀 Mulai Simulasi</button>
+        </div>
+      </div>
+    </div>
+    
+    <div id="workspace" class="workspace hidden">
+      <div class="slots-section">
+        <h3>📋 Slot Stats</h3>
+        <div id="slotsContainer"></div>
+      </div>
+      
+      <div class="results-section">
+        <div id="potentialDisplay" class="potential-display">
+          Potential: 0 / 0
+        </div>
+        <div id="successRateDisplay" class="success-rate">
+          Success Rate: 0%
+        </div>
+        
+                <div class="controls">
+          <button onclick="confirmStep()" id="confirmButton">✅ Confirm</button>
+          <button onclick="repeatStep()" id="repeatButton">🔄 Repeat</button>
+          <button onclick="undoStep()" id="undoButton">↶ Undo</button>
+          <button onclick="redoStep()" id="redoButton">↷ Redo</button>
+          <button onclick="debugSteps()" style="background: #e74c3c; color: white;">🔍 Debug Steps</button>
+        </div>
+        
+        <div class="formula-display" id="formulaDisplay">
+          <strong>📊 Langkah-langkah:</strong><br><br>
+          Belum ada langkah yang dilakukan.
+        </div>
+        
+        <div class="material-costs">
+          <h4>💎 Biaya Material</h4>
+          <table class="material-table" id="materialTable">
+            <thead>
+              <tr>
+                <th>Material</th>
+                <th>Jumlah</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Metal / Logam</td><td>0</td></tr>
+              <tr><td>Cloth / Kain</td><td>0</td></tr>
+              <tr><td>Beast / Fauna</td><td>0</td></tr>
+              <tr><td>Wood / Kayu</td><td>0</td></tr>
+              <tr><td>Medicine / Obat</td><td>0</td></tr>
+              <tr><td>Mana</td><td>0</td></tr>
+              <tr><th>Max/Step</th><td>0</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="math.js"></script>
+  <script src="t4stat.js"></script>
+  <script src="interface-integration.js"></script>
+  <script>
+    // Debug function to check if everything is loaded properly
+    function debugCheck() {
+      console.log("🔍 DEBUGGING CHECK:");
+      console.log("- OPTIONS available:", typeof OPTIONS !== 'undefined' ? `✅ ${OPTIONS.length} items` : "❌ Not found");
+      console.log("- MainApp available:", typeof MainApp !== 'undefined' ? "✅ Available" : "❌ Not found");
+      console.log("- Stat available:", typeof Stat !== 'undefined' ? "✅ Available" : "❌ Not found");
+      console.log("- App instance:", typeof App !== 'undefined' ? "✅ Available" : "❌ Not found");
+      
+      if (typeof App !== 'undefined' && App.getCurrent) {
+        console.log("- App.getCurrent():", App.getCurrent() ? "✅ Available" : "❌ Not found");
+      }
+      
+      const slotsContainer = document.getElementById("slotsContainer");
+      console.log("- slotsContainer element:", slotsContainer ? "✅ Found" : "❌ Not found");
+    }
+
+    // Define functions immediately (before window.onload)
+    window.startSimulation = function() {
+      const startingPot = parseInt(document.getElementById('startingPot').value);
+      const recipePot = parseInt(document.getElementById('recipePot').value);
+      const itemType = document.getElementById('itemType').value;
+      
+      if (!startingPot || startingPot < 1) {
+        alert('❌ Silakan masukkan POT awal yang valid!');
+        return;
+      }
+      
+      if (!recipePot || recipePot < 1) {
+        alert('❌ Silakan masukkan POT resep yang valid!');
+        return;
+      }
+      
+      // Create hidden form elements first
+      createHiddenInputs();
+      
+      // Update form values for the app
+      document.getElementById('starting_pot').value = startingPot;
+      document.getElementById('recipe_pot').value = recipePot;
+      document.getElementById('weap_arm').value = itemType;
+      
+      // Start the simulation
+      try {
+        App.spawn();
+        document.getElementById('workspace').classList.remove('hidden');
+        
+        // Now that workspace is created, trigger loadDisplay
+        if (App.getCurrent && App.getCurrent()) {
+          App.getCurrent().loadDisplay();
+        }
+        
+        // Show success notification
+        if (typeof showNotification === 'function') {
+          showNotification('✅ Simulasi berhasil dimulai!', 'success');
+        }
+      } catch (error) {
+        console.error('Error starting simulation:', error);
+        alert('❌ Terjadi error saat memulai simulasi. Silakan refresh halaman dan coba lagi.');
+      }
+    };
+    
+    function createHiddenInputs() {
+      const inputs = [
+        { id: 'starting_pot', value: document.getElementById('startingPot').value },
+        { id: 'recipe_pot', value: document.getElementById('recipePot').value },
+        { id: 'weap_arm', value: document.getElementById('itemType').value },
+        { id: 'tec', value: document.getElementById('tec').value },
+        { id: 'proficiency', value: document.getElementById('proficiency').value },
+        { id: 'mat_reduction', type: 'checkbox', checked: document.getElementById('matReduction').checked }
+      ];
+      
+      inputs.forEach(input => {
+        let element = document.getElementById(input.id);
+        if (!element) {
+          element = document.createElement('input');
+          element.id = input.id;
+          element.type = input.type || 'text';
+          element.style.display = 'none';
+          document.body.appendChild(element);
+        }
+        
+        if (input.type === 'checkbox') {
+          element.checked = input.checked;
+        } else {
+          element.value = input.value || '';
+        }
+      });
+    }
+
+    // Additional control functions (safety fallbacks)
+    window.confirmStep = window.confirmStep || function() {
+      if (App && App.getCurrent()) {
+        App.getCurrent().confirm();
+      }
+    };
+    
+    window.repeatStep = window.repeatStep || function() {
+      if (App && App.getCurrent()) {
+        App.getCurrent().repeat();
+      }
+    };
+    
+    window.undoStep = window.undoStep || function() {
+      if (App && App.getCurrent()) {
+        App.getCurrent().undo();
+      }
+    };
+
+    window.redoStep = window.redoStep || function() {
+      if (App && App.getCurrent()) {
+        App.getCurrent().redo();
+      }
+    };
+
+    // Debug function for troubleshooting steps
+    window.debugSteps = function() {
+      console.log("🔍 === DEBUG STEPS INFO ===");
+      if (App && App.getCurrent()) {
+        const current = App.getCurrent();
+        console.log("📊 Current Stat Object:", current);
+        console.log("📋 Steps Object:", current.steps);
+        console.log("📝 Formula Length:", current.steps.formula.length);
+        console.log("📝 Condensed Formula Length:", current.steps.condensed_formula.length);
+        console.log("🎯 Finished Status:", current.finished);
+        
+        console.log("📋 All Formula Steps:");
+        current.steps.formula.forEach((step, index) => {
+          console.log(`  ${index + 1}. ${step.text} (${step.pot_after}pot) Repeat: ${step.repeat || 1}`);
+        });
+        
+        console.log("📋 All Condensed Steps:");
+        current.steps.condensed_formula.forEach((step, index) => {
+          console.log(`  ${index + 1}. ${step.text} (${step.pot_after}pot) Repeat: ${step.repeat || 1}`);
+        });
+        
+        console.log("🎨 Current Display:");
+        console.log(current.steps.getDisplay());
+        
+        alert(`Debug Info logged to console!\n\nFormula Steps: ${current.steps.formula.length}\nCondensed Steps: ${current.steps.condensed_formula.length}\nFinished: ${current.finished}`);
+      } else {
+        console.log("❌ No current App instance found");
+        alert("❌ No simulation running");
+      }
+    };
+    
+    // Initialize app when page loads
+    window.onload = () => {
+      // Check dependencies first
+      debugCheck();
+      
+      // Make sure App is available globally
+      if (typeof App === 'undefined') {
+        window.App = new MainApp();
+      }
+      
+      // Load settings and storage safely
+      try {
+        // Load settings first (doesn't require hidden elements)
+        App.loadSettings();
+        
+        // Load from storage only if we have required elements, otherwise skip
+        const hasRequiredElements = ['starting_pot', 'recipe_pot', 'weap_arm'].every(id => document.getElementById(id));
+        if (hasRequiredElements) {
+          App.loadFromStorage();
+        }
+        
+        // Check if workspace exists
+        if (App.getCurrent && App.getCurrent()) {
+          App.getCurrent().loadDisplay();
+        }
+        
+      } catch (error) {
+        console.error("❌ Error loading settings:", error);
+      }
+    };
+  </script>
+
+</body>
+</html>
