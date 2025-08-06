@@ -116,6 +116,8 @@ function App() {
                 <StatSlots
                   slots={state.slots}
                   itemType={state.itemType}
+                  proficiency={state.proficiency}
+                  matReduction={state.matReduction}
                   onSlotChange={updateSlot}
                 />
               </Grid>

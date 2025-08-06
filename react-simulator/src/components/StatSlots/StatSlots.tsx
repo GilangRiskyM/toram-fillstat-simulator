@@ -11,23 +11,10 @@ import {
   TextField,
   Chip,
 } from '@mui/material';
+import { STAT_OPTIONS, MATERIAL_NAMES } from '../../utils/constants';
+import { getGroupedStatOptions, calculateMaterialCost, getCostReduction } from '../../utils/calculations';
 
 type ItemType = 'w' | 'a';
-
-interface StatOption {
-  name: string;
-  mat: string;
-  pot: number;
-  cost: number | string;
-  cat: string;
-  type: string;
-  bonus?: number;
-  bonusratio?: number;
-  step?: number;
-  max?: number;
-  max_only?: boolean;
-  nonega?: boolean;
-}
 
 interface StatSlot {
   optionIndex: number;
@@ -38,64 +25,20 @@ interface StatSlot {
 interface StatSlotsProps {
   slots: StatSlot[];
   itemType: ItemType;
+  proficiency: number;
+  matReduction: boolean;
   onSlotChange: (slotIndex: number, optionIndex: number, value: number) => void;
 }
 
-// Material names for display
-const MATERIAL_NAMES = {
-  Metal: "Metal / Logam",
-  Cloth: "Cloth / Kain", 
-  Beast: "Beast / Fauna",
-  Wood: "Wood / Kayu",
-  Medicine: "Medicine / Obat",
-  Mana: "Mana"
-};
-
-// Stat options (simplified for now - will be imported from constants later)
-const STAT_OPTIONS: StatOption[] = [
-  {
-    name: "STR",
-    mat: "Beast",
-    pot: 5,
-    cost: 25,
-    cat: "Enhance Stats",
-    type: "u",
-    bonus: 1,
-  },
-  {
-    name: "STR %",
-    mat: "Beast",
-    pot: 10,
-    cost: 50,
-    cat: "Enhance Stats",
-    type: "u",
-  },
-  // Add more options later
-];
-
-export const StatSlots: React.FC<StatSlotsProps> = ({ slots, itemType, onSlotChange }) => {
-  const getFilteredOptions = () => {
-    return STAT_OPTIONS.filter(option => 
-      option.type === 'u' || option.type === itemType || option.type === 'e'
-    );
-  };
-
-  const getGroupedOptions = () => {
-    const filteredOptions = getFilteredOptions();
-    const groups: { [key: string]: StatOption[] } = {};
-    
-    filteredOptions.forEach(option => {
-      if (!groups[option.cat]) {
-        groups[option.cat] = [];
-      }
-      groups[option.cat].push(option);
-    });
-    
-    return groups;
-  };
-
+export const StatSlots: React.FC<StatSlotsProps> = ({ 
+  slots, 
+  itemType, 
+  proficiency,
+  matReduction,
+  onSlotChange 
+}) => {
   const renderSelectOptions = () => {
-    const groups = getGroupedOptions();
+    const groups = getGroupedStatOptions(itemType);
     const elements: React.ReactNode[] = [];
     
     Object.entries(groups).forEach(([category, options]) => {
@@ -105,8 +48,8 @@ export const StatSlots: React.FC<StatSlotsProps> = ({ slots, itemType, onSlotCha
         </MenuItem>
       );
       
-      options.forEach((option, index) => {
-        const optionIndex = STAT_OPTIONS.indexOf(option);
+      options.forEach((option) => {
+        const optionIndex = STAT_OPTIONS.indexOf(option) + 1; // +1 because 0 is "PILIH STAT"
         elements.push(
           <MenuItem key={optionIndex} value={optionIndex}>
             {option.name}
@@ -122,11 +65,14 @@ export const StatSlots: React.FC<StatSlotsProps> = ({ slots, itemType, onSlotCha
     const slot = slots[slotIndex];
     if (slot.optionIndex === 0 || slot.value === 0) return '';
     
-    const option = STAT_OPTIONS[slot.optionIndex];
+    const option = STAT_OPTIONS[slot.optionIndex - 1];
     if (!option) return '';
     
+    const costReduction = getCostReduction(proficiency, matReduction);
+    const materialCost = calculateMaterialCost(option, slot.value, costReduction);
     const materialName = MATERIAL_NAMES[option.mat as keyof typeof MATERIAL_NAMES];
-    return `${materialName}: ${slot.materialCost}`;
+    
+    return `${materialName}: ${materialCost}`;
   };
 
   return (

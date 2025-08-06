@@ -1,5 +1,12 @@
 import { useState, useCallback } from 'react';
 import { DEFAULT_WEAPON_RECIPE_POT, DEFAULT_ARMOR_RECIPE_POT } from '../utils/constants';
+import { 
+  calculateFuturePotential, 
+  calculateTotalMaterialCosts, 
+  getSuccessRate,
+  calculateMaterialCost,
+  getCostReduction
+} from '../utils/calculations';
 
 type ItemType = 'w' | 'a';
 
@@ -98,12 +105,32 @@ export const useSimulator = () => {
       isSimulationActive: true,
       currentPot: prev.startingPot,
       futurePot: prev.startingPot,
-      successRate: 100, // Initial success rate
+      successRate: getSuccessRate(prev.startingPot, prev.startingPot, prev.recipePot),
       formulaSteps: [],
       history: [],
       historyIndex: -1,
     }));
   }, [state.startingPot, state.recipePot]);
+
+  const recalculateStats = useCallback((newSlots: StatSlot[], currentPot: number, recipePot: number, proficiency: number, matReduction: boolean) => {
+    // Convert slots to calculation format
+    const slotData = newSlots.map(slot => ({
+      optionIndex: slot.optionIndex,
+      value: slot.value,
+      steps: 0, // Will be calculated in calculations.ts
+    }));
+
+    // Calculate future potential
+    const futurePot = calculateFuturePotential(currentPot, slotData);
+    
+    // Calculate success rate
+    const successRate = getSuccessRate(currentPot, futurePot, recipePot);
+    
+    // Calculate material costs
+    const materialCosts = calculateTotalMaterialCosts(slotData, proficiency, matReduction);
+    
+    return { futurePot, successRate, materialCosts };
+  }, []);
 
   const updateSlot = useCallback((slotIndex: number, optionIndex: number, value: number) => {
     setState(prev => {
@@ -111,35 +138,93 @@ export const useSimulator = () => {
       newSlots[slotIndex] = {
         optionIndex,
         value,
-        materialCost: 0, // TODO: Calculate based on option and value
+        materialCost: 0, // Will be calculated below
       };
       
-      // TODO: Recalculate success rate and material costs
+      // Recalculate all stats
+      const { futurePot, successRate, materialCosts } = recalculateStats(
+        newSlots, 
+        prev.currentPot, 
+        prev.recipePot, 
+        prev.proficiency, 
+        prev.matReduction
+      );
+      
       return {
         ...prev,
         slots: newSlots,
+        futurePot,
+        successRate,
+        materialCosts,
+      };
+    });
+  }, [recalculateStats]);
+
+  const confirm = useCallback(() => {
+    setState(prev => {
+      // Save current state to history
+      const newHistory = [...prev.history.slice(0, prev.historyIndex + 1), {
+        slots: [...prev.slots],
+        currentPot: prev.currentPot,
+        futurePot: prev.futurePot,
+        materialCosts: { ...prev.materialCosts },
+        formulaSteps: [...prev.formulaSteps],
+      }];
+      
+      // Create step description
+      const activeSlots = prev.slots.filter(slot => slot.optionIndex > 0 && slot.value > 0);
+      const stepText = activeSlots.length > 0 
+        ? `Applied ${activeSlots.length} stat(s)`
+        : 'No changes';
+      
+      const newStep: FormulaStep = {
+        text: stepText,
+        pot_after: prev.futurePot,
+        repeat: 1,
+      };
+      
+      return {
+        ...prev,
+        currentPot: prev.futurePot,
+        formulaSteps: [...prev.formulaSteps, newStep],
+        history: newHistory,
+        historyIndex: newHistory.length - 1,
+        // Reset slots for next step
+        slots: initialSlots,
+        materialCosts: initialMaterialCosts,
       };
     });
   }, []);
 
-  const confirm = useCallback(() => {
-    // TODO: Implement confirm logic
-    console.log('Confirm step');
-  }, []);
-
   const repeat = useCallback(() => {
-    // TODO: Implement repeat logic
+    // TODO: Implement repeat logic based on last step
     console.log('Repeat step');
   }, []);
 
   const undo = useCallback(() => {
-    // TODO: Implement undo logic
-    console.log('Undo step');
+    setState(prev => {
+      if (prev.historyIndex <= 0) return prev;
+      
+      const previousState = prev.history[prev.historyIndex - 1];
+      return {
+        ...prev,
+        ...previousState,
+        historyIndex: prev.historyIndex - 1,
+      };
+    });
   }, []);
 
   const redo = useCallback(() => {
-    // TODO: Implement redo logic
-    console.log('Redo step');
+    setState(prev => {
+      if (prev.historyIndex >= prev.history.length - 1) return prev;
+      
+      const nextState = prev.history[prev.historyIndex + 1];
+      return {
+        ...prev,
+        ...nextState,
+        historyIndex: prev.historyIndex + 1,
+      };
+    });
   }, []);
 
   const exportState = useCallback(() => {
