@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { MATERIAL_TYPES } from '../data/statsData.js';
-import { formatMaterialName, calculateMaterialCost, toramRound } from '../utils/calculations.js';
+import { toramRound } from '../utils/mathUtils.js';
+import { formatMaterialName } from '../utils/calculations.js';
 
 // Hook for material cost calculations
 export function useMaterialCalculator(statEngine) {
