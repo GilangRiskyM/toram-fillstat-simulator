@@ -4,7 +4,6 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
 import { useSimulator } from '../../context/SimulatorContext';
 import useSimulatorLogic from '../../hooks/useSimulator';
 import { 
