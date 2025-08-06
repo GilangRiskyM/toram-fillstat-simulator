@@ -92,4 +92,6 @@ export function Calc(num) {
   return new MathCalculator(num);
 }
 
-export default { MathCalculator, Calc };
+const MathExport = { MathCalculator, Calc };
+
+export default MathExport;

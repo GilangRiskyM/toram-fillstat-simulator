@@ -144,4 +144,6 @@ export function useAutoSave(saveFunction, interval = 30000, enabled = true) {
   }, [saveFunction, interval, enabled]);
 }
 
-export default { useLocalStorage, useAutoSave };
+const LocalStorageExport = { useLocalStorage, useAutoSave };
+
+export default LocalStorageExport;

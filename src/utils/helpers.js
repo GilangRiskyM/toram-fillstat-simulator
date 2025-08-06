@@ -191,7 +191,7 @@ export function formatStepDisplay(step) {
   return `${stepNum} ${stepText}${repeatText} ${potText}`;
 }
 
-export default {
+const HelpersExport = {
   toramRound,
   deepClone,
   generateWorkspaceId,
@@ -206,3 +206,5 @@ export default {
   isMobile,
   formatStepDisplay
 };
+
+export default HelpersExport;

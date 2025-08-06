@@ -82,7 +82,7 @@ export const STORAGE_KEYS = {
   EXTRA_SETTINGS: 'extra_settings'
 };
 
-export default {
+const ConstantsExport = {
   MAX_STEPS,
   BONUS_STEPS,
   SLOTS,
@@ -98,3 +98,5 @@ export default {
   GRADIENT_BACKGROUNDS,
   STORAGE_KEYS
 };
+
+export default ConstantsExport;

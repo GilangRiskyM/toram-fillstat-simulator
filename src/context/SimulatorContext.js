@@ -6,7 +6,6 @@
 import React, { createContext, useContext, useReducer, useCallback, useEffect } from 'react';
 import { DEFAULT_SETTINGS, MATERIAL_TYPES, ITEM_TYPES } from '../utils/constants';
 import { useLocalStorage, useAutoSave } from '../hooks/useLocalStorage';
-import { parsePotential, parseTEC, parseProficiency, deepClone } from '../utils/helpers';
 
 // Initial state structure
 const initialState = {
@@ -293,7 +292,7 @@ export function SimulatorProvider({ children }) {
   }, [saveSettings]);
 
   const startSimulation = useCallback(() => {
-    const { startingPot, recipePot, itemType } = state.settings;
+    const { startingPot, recipePot } = state.settings;
     
     if (!startingPot || startingPot < 1) {
       dispatch({
