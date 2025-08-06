@@ -1,0 +1,1 @@
+export { StatSlots } from './StatSlots';
